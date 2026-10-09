@@ -4,7 +4,6 @@ use serde_json::{Value, json};
 use std::collections::HashMap;
 
 const API: &str = "https://www.strava.com/api/v3";
-// ponytail: plain file so rotated refresh tokens survive restarts; seed it once by hand
 const REFRESH_TOKEN_FILE: &str = "refresh_token";
 
 fn env(key: &str) -> String {
@@ -33,7 +32,11 @@ async fn register() {
         .await;
     // A 400 "already exists" on restart is expected: Strava allows one subscription per app.
     match res {
-        Ok(r) => eprintln!("subscription: {} {}", r.status(), r.text().await.unwrap_or_default()),
+        Ok(r) => eprintln!(
+            "subscription: {} {}",
+            r.status(),
+            r.text().await.unwrap_or_default()
+        ),
         Err(e) => eprintln!("subscription failed: {e}"),
     }
 }
@@ -66,7 +69,8 @@ async fn event(Json(e): Json<Event>) -> StatusCode {
 
 async fn handle_activity(id: u64) -> reqwest::Result<()> {
     let http = reqwest::Client::new();
-    let refresh_token = std::fs::read_to_string(REFRESH_TOKEN_FILE).expect("refresh_token file missing");
+    let refresh_token =
+        std::fs::read_to_string(REFRESH_TOKEN_FILE).expect("refresh_token file missing");
     let tokens: Value = http
         .post("https://www.strava.com/oauth/token")
         .form(&[
