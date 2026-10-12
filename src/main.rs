@@ -100,7 +100,7 @@ async fn handle_activity(id: u64) -> reqwest::Result<()> {
     if should_hide(&activity) {
         http.put(format!("{API}/activities/{id}"))
             .bearer_auth(token)
-            .json(&json!({ "hide_from_home": true }))
+            .json(&json!({ "hide_from_home": true, "commute": true }))
             .send()
             .await?
             .error_for_status()?;
